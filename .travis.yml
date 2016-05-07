@@ -1,0 +1,11 @@
+language: java
+jdk:
+- oraclejdk7
+before_deploy:
+- ./gradlew build
+deploy:
+- provider: script
+  script: "curl --ftp-create-dirs -T app/build/outputs/apk/app-release-unsigned.apk -u \"$FTP_CREDENTIALS\" ftp://ftp.reederhome.net/turbo-spork-latest.apk"
+  skip_cleanup: true
+  on:
+    repo: fictional-pancake/turbo-spork-android
