@@ -8,7 +8,7 @@ android:
 script: ./gradlew build --stacktrace
 deploy:
 - provider: script
-  script: "curl --ftp-create-dirs -T app/build/outputs/apk/app-release-unsigned.apk -u \"$FTP_CREDENTIALS\" ftp://ftp.reederhome.net/turbo-spork-latest.apk"
+  script: "curl --ftp-create-dirs -T app/build/outputs/apk/app-debug.apk -u \"$FTP_CREDENTIALS\" ftp://ftp.reederhome.net/turbo-spork-latest.apk"
   skip_cleanup: true
   on:
     repo: fictional-pancake/turbo-spork-android
