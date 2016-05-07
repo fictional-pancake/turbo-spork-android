@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:columnCount="2"
+    android:layout_gravity="center"
+    android:layout_height="wrap_content"
+    android:layout_margin="20dp"
+    android:layout_width="fill_parent"
+    android:orientation="vertical"
+    android:rowCount="5"
+    android:padding="0dp">
+
+    <TextView
+        android:id="@+id/errorText"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_width="fill_parent"
+        android:text="error"
+        android:textColor="@android:color/holo_red_dark"
+        android:onClick="onClick" />
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleHorizontal"
+        android:id="@+id/progressBar"
+        android:indeterminate="true"
+        android:indeterminateOnly="false"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:visibility="invisible" />
+
+    <EditText
+        android:hint="Username"
+        android:id="@+id/username"
+        android:inputType="textNoSuggestions"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent" />
+
+    <EditText
+        android:hint="Password"
+        android:id="@+id/password"
+        android:inputType="textPassword"
+        android:layout_height="wrap_content"
+        android:layout_width="fill_parent" />
+
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/buttonGuest"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:text="Play as Guest"
+            android:onClick="onClick" />
+
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:onClick="onClick"
+            android:text="Login" />
+    </LinearLayout>
+
+</LinearLayout>
