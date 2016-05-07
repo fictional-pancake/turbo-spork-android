@@ -26,4 +26,8 @@ public class GameColors {
             return 0xFF000000+new Random(owner).nextInt(0xFFFFFF);
         }
     }
+
+    public static int darken(int color) {
+        return Color.argb(Color.alpha(color), ((int) (Color.red(color) * 0.7)), ((int) (Color.green(color) * 0.7)), ((int) (Color.blue(color) * 0.7)));
+    }
 }
