@@ -21,7 +21,7 @@ import fictionalpancake.turbospork.MathHelper;
 import fictionalpancake.turbospork.Node;
 import fictionalpancake.turbospork.UnitGroup;
 
-public class GameMainView extends SurfaceView implements SurfaceHolder.Callback {
+public class GameMainView extends SurfaceView {
     private GameHandler gameHandler;
     private long lastPaint;
 
@@ -29,21 +29,6 @@ public class GameMainView extends SurfaceView implements SurfaceHolder.Callback 
         super(context, attrs);
         new Thread(new Painter()).start();
         gameHandler = LoginActivity.lastGameHandler;
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-
-    }
-
-    @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder holder) {
-
     }
 
     private class Painter implements Runnable {

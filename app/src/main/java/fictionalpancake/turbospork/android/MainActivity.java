@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements RoomInfoListener 
             @Override
             public void run() {
                 ((Button) findViewById(R.id.joinButton)).setText(gameHandler.getUsers().size() == 0 ? R.string.joinRoom : R.string.switchRoom);
+                findViewById(R.id.startButton).setEnabled(gameHandler.getPosition() == 0 && !gameHandler.isMatchMeRoom() && !gameHandler.hasGameData());
             }
         });
     }
@@ -114,6 +115,9 @@ public class MainActivity extends AppCompatActivity implements RoomInfoListener 
         else if(view.getId() == R.id.startButton) {
             gameHandler.startGame();
         }
+        else if(view.getId() == R.id.playButton) {
+            gameHandler.join("matchme");
+        }
     }
 
     private class PlayerColorArrayAdapter<T> extends ArrayAdapter<String> {
@@ -125,6 +129,7 @@ public class MainActivity extends AppCompatActivity implements RoomInfoListener 
         public View getView(int position, View convertView, ViewGroup parent) {
             View tr = super.getView(position, convertView, parent);
             ((TextView) tr).setTextColor(GameColors.getColorForOwner(gameHandler.adjustForRemoved(position)));
+            ((TextView) tr).setSingleLine();
             return tr;
         }
     }

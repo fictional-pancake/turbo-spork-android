@@ -17,17 +17,27 @@
             android:onClick="onClick" />
 
         <Button
+            android:id="@+id/playButton"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/start_game"
-            android:id="@+id/startButton" android:layout_below="@id/joinButton"
+            android:layout_below="@id/joinButton"
+            android:text="@string/play"
             android:onClick="onClick" />
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/playButton"
+            android:onClick="onClick"
+            android:text="@string/start_game" />
 
         <ListView
             android:id="@+id/userList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/background_light" android:layout_below="@id/startButton" />
+            android:layout_below="@id/startButton"
+            android:background="@android:color/background_light" />
 
     </RelativeLayout>
 
