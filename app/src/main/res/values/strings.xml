@@ -1,4 +1,11 @@
 <resources>
     <string name="app_name">Turbo-Spork</string>
     <string name="login_title">Login to Turbo-Spork</string>
+    <string name="switchRoom">Switch Room</string>
+    <string name="joinRoom">Join Room</string>
+    <string name="joinPrompt">Room to join?</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="error">Error</string>
+    <string name="start_game">Start Game</string>
 </resources>
