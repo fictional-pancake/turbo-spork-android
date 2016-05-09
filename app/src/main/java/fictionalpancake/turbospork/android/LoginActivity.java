@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                                 showError(error);
                             }
                         }
-                    }, new URI("ws://turbo-spork-test.herokuapp.com"));
+                    }, new URI(BuildConfig.DEBUG?"ws://turbo-spork-test.herokuapp.com":"ws://turbo-spork.herokuapp.com"));
                     lastGameHandler.connectBlocking();
                     String authMsg = "auth:";
                     if (view.getId() != R.id.buttonGuest) {
