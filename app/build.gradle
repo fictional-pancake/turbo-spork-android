@@ -8,8 +8,8 @@ android {
         applicationId "fictionalpancake.turbospork.android"
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 3
-        versionName "0.3"
+        versionCode 301
+        versionName "0.3.1"
     }
     buildTypes {
         release {
