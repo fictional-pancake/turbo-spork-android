@@ -20,147 +20,96 @@ import fictionalpancake.turbospork.GameHandler;
 import fictionalpancake.turbospork.MathHelper;
 import fictionalpancake.turbospork.Node;
 import fictionalpancake.turbospork.UnitGroup;
+import fictionalpancake.turbospork.paint.GraphicsHandler;
+import fictionalpancake.turbospork.paint.IPainter;
+import fictionalpancake.turbospork.paint.PaintStyle;
 
 public class GameMainView extends SurfaceView {
     private GameHandler gameHandler;
-    private long lastPaint;
+    private GraphicsHandler graphicsHandler;
+    private int statusBarHeight;
 
     public GameMainView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        new Thread(new Painter()).start();
         gameHandler = LoginActivity.lastGameHandler;
+        graphicsHandler = new GraphicsHandler(gameHandler);
+        int barId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if(barId > 0) {
+            statusBarHeight = getResources().getDimensionPixelSize(barId);
+        }
+        new Thread(new Painter(graphicsHandler)).start();
     }
 
-    private class Painter implements Runnable {
+    private class Painter implements Runnable, IPainter {
+        private Canvas cnvs;
+        private GraphicsHandler graphicsHandler;
+
+        public Painter(GraphicsHandler graphicsHandler) {
+            this.graphicsHandler = graphicsHandler;
+        }
+
         @Override
         public void run() {
             while (true) {
-                Canvas cnvs = getHolder().lockCanvas();
+                cnvs = getHolder().lockCanvas();
                 if (cnvs != null) {
                     cnvs.drawColor(Color.WHITE);
-                    if (gameHandler.hasGameData()) {
-                        Node[] nodes = gameHandler.getNodes().toArray(new Node[0]);
-                        UnitGroup[] groups = gameHandler.getUnitGroups().toArray(new UnitGroup[0]);
-                        for (Node node : nodes) {
-                            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                            paint.setColor(GameColors.getColorForOwner(node.getOwner()));
-                            cnvs.drawCircle(convertX(node.getX()), convertY(node.getY()), convertSize(GameConstants.NODE_RADIUS), paint);
-                            drawNodeUnits(cnvs, node);
-                        }
-                        if (selectedNode != null) {
-                            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                            paint.setStyle(Paint.Style.STROKE);
-                            paint.setStrokeWidth(convertSize(GameConstants.OUTLINE_SIZE));
-                            paint.setColor(0xFFFFAFAF);
-                            cnvs.drawCircle(convertX(selectedNode.getX()), convertY(selectedNode.getY()), convertSize(GameConstants.NODE_RADIUS), paint);
-                        }
-                        for (UnitGroup group : groups) {
-                            int owner = group.getOwner();
-                            drawUnitGroup(cnvs, group.getX(), group.getY(), owner, group.getUnits(), getGroupSeed(group.getSource(), owner), getGroupSeed(group.getDest(), owner), group.getProgress());
-                        }
-                        if(!gameHandler.isInProgress()) {
-                            Paint paint = new Paint();
-                            paint.setTextAlign(Paint.Align.CENTER);
-                            paint.setTextSize(convertSize(GameConstants.GAMEREADY_TEXT_SIZE));
-                            paint.setColor(Color.RED);
-                            cnvs.drawText("Game starting soon", convertX(GameConstants.FIELD_SIZE/2), convertY(GameConstants.FIELD_SIZE/2), paint);
-                        }
-                    }
-                    else {
-                        selectedNode = null;
-                        String winner = gameHandler.getLastWinner();
-                        if(winner != null) {
-                            Paint paint = new Paint();
-                            paint.setColor(Color.GRAY);
-                            paint.setTextSize(convertSize(GameConstants.WIN_TEXT_SIZE));
-                            paint.setTextAlign(Paint.Align.CENTER);
-                            cnvs.drawText(winner+" wins!", convertX(GameConstants.FIELD_SIZE/2), convertY(GameConstants.FIELD_SIZE/2), paint);
-                        }
-                    }
-                    long time = System.currentTimeMillis();
-                    int fps = ((int) (1000.0 / (time - lastPaint)));
-                    Paint paint = new Paint();
-                    paint.setTextSize(convertSize(GameConstants.SMALL_TEXT_SIZE));
-                    cnvs.drawText(fps+" fps", convertX(0), convertY(GameConstants.SMALL_TEXT_SIZE), paint);
-                    lastPaint = time;
+                    graphicsHandler.paint(this);
                     getHolder().unlockCanvasAndPost(cnvs);
                 }
             }
         }
-    }
 
-    private float sc;
-    private int xoff, yoff;
-    private Node selectedNode;
-
-    private int convertSize(double i) {
-        updateScale();
-        return (int) (i * sc);
-    }
-
-    private int convertX(double x) {
-        return convertSize(x) + xoff;
-    }
-
-    private int convertY(double y) {
-        return convertSize(y) + yoff;
-    }
-
-    private void updateScale() {
-        Rect frame = getHolder().getSurfaceFrame();
-        int width = frame.width();
-        int height = frame.height();
-        if (width > height) {
-            xoff = (width - height) / 2;
-            yoff = 0;
-            sc = ((float) height) / GameConstants.FIELD_SIZE;
-        } else {
-            xoff = 0;
-            yoff = (height - width) / 2;
-            sc = ((float) width) / GameConstants.FIELD_SIZE;
+        @Override
+        public int getWidth() {
+            return cnvs.getWidth();
         }
-    }
 
-    private void drawNodeUnits(Canvas cnvs, Node node) {
-        List<Integer> owners = node.getUnitOwners();
-        for (int i = 0; i < owners.size(); i++) {
-            int owner = owners.get(i);
-            int seed = getGroupSeed(node, owner);
-            drawUnitGroup(cnvs, node.getX(), node.getY(), owner, node.getUnits(owner), seed, seed, 0);
+        @Override
+        public int getHeight() {
+            return cnvs.getHeight();
         }
-    }
 
-    private void drawUnitGroup(Canvas cnvs, double x, double y, int owner, int units, int seed1, int seed2, double progress) {
-        Random rand1 = new Random(seed1);
-        Random rand2 = new Random(seed2);
-        int radius = convertSize(GameConstants.UNIT_RADIUS);
-        Paint paint = new Paint();
-        paint.setColor(GameColors.darken(GameColors.getColorForOwner(owner)));
-        Paint outline = new Paint();
-        outline.setStyle(Paint.Style.STROKE);
-        outline.setColor(Color.BLACK);
-        for (int i = 0; i < units; i++) {
-            Point coords1 = getRandomUnitCoords(rand1, x, y);
-            Point coords2 = getRandomUnitCoords(rand2, x, y);
-            int unitX = (int) (coords1.x + (coords2.x - coords1.x) * progress);
-            int unitY = (int) (coords1.y + (coords2.y - coords1.y) * progress);
-            cnvs.drawCircle(unitX, unitY, radius, outline);
-            cnvs.drawCircle(unitX, unitY, radius, paint);
+        @Override
+        public void drawCircle(PaintStyle paintStyle, int x, int y, int radius) {
+            cnvs.drawCircle(x, y, radius, convertPaint(paintStyle));
         }
-    }
 
-    private Point getRandomUnitCoords(Random rand, double x, double y) {
-        double angle = rand.nextDouble() * 2 * Math.PI;
-        double distance = Math.sqrt(rand.nextDouble()) * GameConstants.UNIT_MAX_DISTANCE * GameConstants.NODE_RADIUS;
-        return new Point(convertX(distance * Math.cos(angle) + x), convertY(distance * Math.sin(angle) + y));
-    }
+        @Override
+        public void drawText(PaintStyle paintStyle, String s, int x, int y) {
+            Paint paint = convertPaint(paintStyle);
+            int ay = y;
+            if(paintStyle.alignY == PaintStyle.Align.TOP) {
+                ay += paintStyle.textSize;
+                //ay += statusBarHeight;
+            }
+            else if(paintStyle.alignY == PaintStyle.Align.BOTTOM) {
+                ay -= paint.descent();
+            }
+            cnvs.drawText(s, x, ay, paint);
+        }
 
-    private int getGroupSeed(Node node, int owner) {
-        List<Node> nodes = gameHandler.getNodes();
-        if (nodes != null) {
-            return nodes.indexOf(node) * (owner + 1);
-        } else {
-            return owner;
+        @Override
+        public fictionalpancake.turbospork.paint.Point getMousePos() {
+            return null;
+        }
+
+        private Paint convertPaint(PaintStyle paintStyle) {
+            Paint tr = new Paint(Paint.ANTI_ALIAS_FLAG);
+            tr.setColor(convertColor(paintStyle.color));
+            if (paintStyle.alignX == PaintStyle.Align.CENTER) {
+                tr.setTextAlign(Paint.Align.CENTER);
+            } else if (paintStyle.alignX == PaintStyle.Align.RIGHT) {
+                tr.setTextAlign(Paint.Align.RIGHT);
+            }
+            tr.setStyle(paintStyle.fill ? Paint.Style.FILL : Paint.Style.STROKE);
+            tr.setStrokeWidth(paintStyle.strokeWidth);
+            tr.setTextSize(paintStyle.textSize);
+            return tr;
+        }
+
+        private int convertColor(fictionalpancake.turbospork.paint.Color color) {
+            return 0xFF000000 + color.getRed() * 0x10000 + color.getGreen() * 0x100 + color.getBlue();
         }
     }
 
@@ -170,32 +119,22 @@ public class GameMainView extends SurfaceView {
         System.out.println(event.getAction());
         if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
             Node node = getNodeUnder(event.getX(), event.getY());
-            if (node == selectedNode) {
-                selectedNode = null;
-            } else if (selectedNode == null) {
-                if (node.getUnits(gameHandler.getPosition()) > 0) {
-                    selectedNode = node;
-                }
-            }
+            graphicsHandler.select(node);
             return true;
         } else if (event.getActionMasked() == MotionEvent.ACTION_UP) {
-            if (selectedNode != null) {
-                Node node = getNodeUnder(event.getX(), event.getY());
-                if (selectedNode != node) {
-                    gameHandler.attack(node, selectedNode);
-                    selectedNode = null;
-                }
-            }
+            Node node = getNodeUnder(event.getX(), event.getY());
+            graphicsHandler.attack(node);
         }
         return tr;
     }
 
     private Node getNodeUnder(float x, float y) {
+        fictionalpancake.turbospork.paint.Point point = new fictionalpancake.turbospork.paint.Point(((int) x), ((int) y));
         List<Node> nodes = gameHandler.getNodes();
         Node tr = null;
         if (nodes != null) {
             for (Node node : nodes) {
-                if (MathHelper.distance((int) x, (int) y, convertX(node.getX()), convertY(node.getY())) <= convertSize(GameConstants.NODE_RADIUS)) {
+                if (graphicsHandler.isMouseOverNode(node, point)) {
                     tr = node;
                 }
             }
