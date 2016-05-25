@@ -103,7 +103,7 @@ public class GameMainView extends SurfaceView {
                 tr.setTextAlign(Paint.Align.RIGHT);
             }
             tr.setStyle(paintStyle.fill ? Paint.Style.FILL : Paint.Style.STROKE);
-            tr.setStrokeWidth(paintStyle.strokeWidth);
+            tr.setStrokeWidth(paintStyle.strokeWidth/1.5f);
             tr.setTextSize(paintStyle.textSize);
             return tr;
         }
